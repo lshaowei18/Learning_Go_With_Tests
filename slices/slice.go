@@ -3,6 +3,7 @@ package slice
 import (
 	"bytes"
 	"fmt"
+	"reflect"
 )
 
 type path []byte
@@ -33,13 +34,27 @@ func PtrSubtractOneFromLength(slicePtr *[]byte) {
 	*slicePtr = slice[0 : len(slice)-1]
 }
 
-func Extend(slice []byte, element byte) ([]byte, error) {
-	var err error
+func Extend(slice []byte, element byte) (s []byte, err error) {
 	defer rescue("Slice out of bound", &err)
 	length := len(slice)
-	slice = slice[0 : length+1]
-	slice[length] = element
-	return slice, err
+	s = slice[0 : length+1]
+	s[length] = element
+
+	return
+}
+
+func DoubleSliceCapacity(s interface{}) error {
+	valPtr := reflect.ValueOf(s)
+	if valPtr.Kind() != reflect.Ptr {
+		return fmt.Errorf("Interface not a pointer.\n")
+	}
+	val := valPtr.Elem()
+	if val.Kind() != reflect.Slice {
+		return fmt.Errorf("Error in DoubleSliceCapacity, interface given not a slice")
+	}
+	dst := reflect.MakeSlice(val.Type(), val.Len(), val.Len())
+	val.Set(reflect.AppendSlice(dst, val))
+	return nil
 }
 
 func (p *path) TruncateAtFinalSlash() {

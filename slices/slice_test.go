@@ -75,6 +75,36 @@ func TestExtend(t *testing.T) {
 	}
 }
 
+//Increase slice capacity by creating a new underlying array
+func TestDoubleSliceCapacity(t *testing.T) {
+	t.Run("Given pointer to a slice", func(t *testing.T) {
+		slice := make([]byte, 2)
+		DoubleSliceCapacity(&slice)
+		got := cap(slice)
+		want := 4
+		if got != want {
+			t.Errorf("got %d, want %d", got, want)
+		}
+	})
+
+	t.Run("Given slice", func(t *testing.T) {
+		slice := make([]byte, 2)
+		got := DoubleSliceCapacity(slice)
+		if got == nil {
+			t.Errorf("got %v, wants an error because pointer not given.", got)
+		}
+	})
+
+	t.Run("Given a pointer to a string", func(t *testing.T) {
+		str := "Hello"
+		got := DoubleSliceCapacity(&str)
+		if got == nil {
+			t.Errorf("got %v, wants an error because argument should be a slice.", got)
+		}
+	})
+
+}
+
 func TestTruncateAtFinalSlash(t *testing.T) {
 	got := path("/usr/bin/tso")
 	got.TruncateAtFinalSlash()
